@@ -11,6 +11,15 @@
 using namespace std;
 using namespace glm;
 
+float dist = 3.0f;
+float Azimuth = 0.0f;
+float Elevation = 0.0f;
+float startx = 0.0f;
+float starty = 0.0f;
+bool shiftDown = false;
+bool mouseDown = false;
+
+
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -36,23 +45,42 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 {
    double xpos, ypos;
    glfwGetCursorPos(window, &xpos, &ypos);
-
+   startx = xpos;
+   starty = ypos;
    // TODO: CAmera controls
 
    int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
    if (state == GLFW_PRESS)
    {
+       mouseDown = true;
        int keyPress = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
-       if (keyPress == GLFW_PRESS) {}
+       if (keyPress == GLFW_PRESS) {
+           shiftDown = true;
+       }
+       
    }
    else if (state == GLFW_RELEASE)
    {
+       mouseDown = false;
+       shiftDown = false;
    }
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-   // TODO: CAmera controls
+    if (shiftDown == false && mouseDown == true) {
+        Azimuth += (xpos - startx)*0.15f;
+        Elevation += (ypos - starty)*0.15f;
+    }
+    else if(mouseDown == true){
+        float delta = 0.15f*(ypos - starty);
+        dist += delta;
+        /*if (dist < 1.0f) {
+            dist = 1.0f;
+        }*/
+    }
+    startx = xpos;
+    starty = ypos;
 }
 
 static void PrintShaderErrors(GLuint id, const std::string label)
@@ -133,22 +161,37 @@ int main(int argc, char** argv)
    {
       1.0, -1.0, 0.5,
      -1.0, -1.0, 0.5,
-      0.0, 1.0,  0.5
+      0.0, 1.0,  0.5,
+     -1.0, -1.0,0.5,
+      0.0, -1.0, -0.5,
+      0.0, 1.0, 0.5,
+      0.0, -1.0, -0.5,
+      1.0, -1.0, 0.5,
+      0.0, 1.0, 0.5
    };
 
    const float normals[] =
    {
       0.0f, 0.0f, 1.0f,
       0.0f, 0.0f, 1.0f,
-      0.0f, 0.0f, 1.0f
+      0.0f, 0.0f, 1.0f,
+      2.0f/3.0f, -1.0f/3.0f, 2.0f/3.0f,
+      2.0f / 3.0f, -1.0f / 3.0f, 2.0f / 3.0f,
+      2.0f / 3.0f, -1.0f / 3.0f, 2.0f / 3.0f,
+      -2.0f/3.0f, -1.0f/3.0f, 2.0f/3.0f, 
+      -2.0f / 3.0f, -1.0f / 3.0f, 2.0f / 3.0f,
+      -2.0f / 3.0f, -1.0f / 3.0f, 2.0f / 3.0f,
+
    };
 
    const unsigned int indices[] =
    {
-      0, 1, 2
+      0, 1, 2,
+      3, 4, 5,
+      6, 7, 8
    };
 
-   int numTriangles = 1;
+   int numTriangles = 3;
 
    GLuint vboPosId;
    glGenBuffers(1, &vboPosId);
@@ -215,10 +258,27 @@ int main(int argc, char** argv)
 
    glUseProgram(shaderId);
 
+   GLuint matrixParam = glGetUniformLocation(shaderId, "mvp");
+   glm::mat4 transform(1.0); // initialize to identity
+   glm::mat4 projection = glm::perspective(glm::radians(50.0f), 1.0f, 0.1f, 10.0f);
+   //glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -2.0f, 2.0f);
+   glm::mat4 camera;
+
+   glClearColor(0, 0, 0, 1);
+
    // Loop until the user closes the window 
    while (!glfwWindowShouldClose(window))
    {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the buffers
+      float x = dist * sin(Azimuth) * cos(Elevation);
+      float y = dist * sin(Elevation);
+      float z = dist * cos(Azimuth) * cos(Elevation);
+      camera = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+      cout << "Azimuth " << Azimuth << " Elevation" << Elevation << endl;
+          /*float dx = 0.1 * sin(glfwGetTime());
+      transform = glm::translate(glm::mat4(1.0), glm::vec3(dx, 0, 0));*/
+      glm::mat4 mvp = projection * camera * transform;
+      glUniformMatrix4fv(matrixParam, 1, GL_FALSE, &mvp[0][0]);
 
       // Draw primitive
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementbuffer);
