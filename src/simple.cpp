@@ -47,7 +47,6 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
    glfwGetCursorPos(window, &xpos, &ypos);
    startx = xpos;
    starty = ypos;
-   // TODO: CAmera controls
 
    int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
    if (state == GLFW_PRESS)
@@ -75,9 +74,6 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
     else if(mouseDown == true){
         float delta = 0.15f*(ypos - starty);
         dist += delta;
-        /*if (dist < 1.0f) {
-            dist = 1.0f;
-        }*/
     }
     startx = xpos;
     starty = ypos;
@@ -274,7 +270,6 @@ int main(int argc, char** argv)
       float y = dist * sin(Elevation);
       float z = dist * cos(Azimuth) * cos(Elevation);
       camera = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-      cout << "Azimuth " << Azimuth << " Elevation" << Elevation << endl;
           /*float dx = 0.1 * sin(glfwGetTime());
       transform = glm::translate(glm::mat4(1.0), glm::vec3(dx, 0, 0));*/
       glm::mat4 mvp = projection * camera * transform;

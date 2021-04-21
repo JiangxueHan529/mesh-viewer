@@ -38,7 +38,17 @@ namespace agl {
       // face indices in this model
       unsigned int* indices() const;
 
+   private:
+       glm::vec3 min_bound;
+       glm::vec3 max_bound;
+       int num_vertices;
+       int num_faces;
+       float* position;
+       unsigned int* indice;
+       float* normal;
+
    };
+
 }
 
 #endif

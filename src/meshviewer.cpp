@@ -9,6 +9,7 @@
 #include <vector>
 #include "mesh.h"
 #include "osutils.h"
+#include <glm/gtx/string_cast.hpp>
 
 using namespace std;
 using namespace glm;
@@ -24,11 +25,40 @@ GLuint theVboPosId;
 GLuint theVboNormalId;
 GLuint theElementbuffer;
 
+
+float dist = 3.0f;
+float Azimuth = 0.0f;
+float Elevation = 0.0f;
+float startx = 0.0f;
+float starty = 0.0f;
+bool shiftDown = false;
+bool mouseDown = false;
+glm::mat4 _transform;
+
 static void LoadModel(int modelId)
 {
    assert(modelId >= 0 && modelId < theModelNames.size());
    theModel.loadPLY(theModelNames[theCurrentModel]);
+   vec3 min_bound = theModel.getMinBounds();
+   vec3 max_bound = theModel.getMaxBounds();
 
+   glm::vec3 center = (min_bound + max_bound) / 2.0f;
+   float longest;
+   if ((max_bound[0] - min_bound[0]) > (max_bound[1] - min_bound[1]) && (max_bound[0] - min_bound[0]) > (max_bound[2] - min_bound[2])) {
+       longest = max_bound[0] - min_bound[0];
+   }
+   else if ((max_bound[1] - min_bound[1]) > (max_bound[0] - min_bound[0]) && (max_bound[1] - min_bound[1]) > (max_bound[2] - min_bound[2])) {
+       longest = max_bound[1] - min_bound[1];
+   }
+   else {
+       longest = max_bound[2] - min_bound[2];
+   }
+   float ratio = 2.0f / longest;
+   glm::mat4 move = glm::translate(glm::mat4(1.0f), -center);
+   glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(ratio, ratio, ratio));
+   //glm::vec4 vector(1.f, 1.f, 1.f, 1.f);
+   _transform = scale * move;
+   cout << glm::to_string(_transform) << endl;
    glBindBuffer(GL_ARRAY_BUFFER, theVboPosId);
    glBufferData(GL_ARRAY_BUFFER, theModel.numVertices() * 3 * sizeof(float), theModel.positions(), GL_DYNAMIC_DRAW);
 
@@ -79,25 +109,41 @@ static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-   double xpos, ypos;
-   glfwGetCursorPos(window, &xpos, &ypos);
 
-   // TODO: Camera controls
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    startx = xpos;
+    starty = ypos;
 
-   int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-   if (state == GLFW_PRESS)
-   {
-       int keyPress = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
-       if (keyPress == GLFW_PRESS) {}
-   }
-   else if (state == GLFW_RELEASE)
-   {
-   }
+    int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
+    if (state == GLFW_PRESS)
+    {
+        mouseDown = true;
+        int keyPress = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
+        if (keyPress == GLFW_PRESS) {
+            shiftDown = true;
+        }
+
+    }
+    else if (state == GLFW_RELEASE)
+    {
+        mouseDown = false;
+        shiftDown = false;
+    }
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-   // TODO: Camera controls
+    if (shiftDown == false && mouseDown == true) {
+        Azimuth += (xpos - startx) * 0.15f;
+        Elevation += (ypos - starty) * 0.15f;
+    }
+    else if (mouseDown == true) {
+        float delta = 0.15f * (ypos - starty);
+        dist += delta;
+    }
+    startx = xpos;
+    starty = ypos;
 }
 
 static void PrintShaderErrors(GLuint id, const std::string label)
@@ -244,15 +290,27 @@ int main(int argc, char** argv)
    LoadModels("../models/");
    LoadModel(0);
 
-   GLuint shaderId = LoadShader("../shaders/phong.vs", "../shaders/phong.fs");
+   GLuint shaderId = LoadShader("../shaders/unlit.vs", "../shaders/unlit.fs");
    glUseProgram(shaderId);
+
+   GLuint matrixParam = glGetUniformLocation(shaderId, "mvp");
+   
+   glm::mat4 projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.1f, 10.0f);
+   //glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -2.0f, 2.0f);
+   glm::mat4 camera;
+
+   glClearColor(0, 0, 0, 1);
 
    // Loop until the user closes the window 
    while (!glfwWindowShouldClose(window))
    {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the buffers
-
-      // Draw primitive
+      float x = dist * sin(Azimuth) * cos(Elevation);
+      float y = dist * sin(Elevation);
+      float z = dist * cos(Azimuth) * cos(Elevation);
+      camera = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+     // Draw primitive
+      glm::mat4 mvp = projection * camera * _transform; 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, theElementbuffer);
       glDrawElements(GL_TRIANGLES, theModel.numTriangles() * 3, GL_UNSIGNED_INT, (void*)0);
 
