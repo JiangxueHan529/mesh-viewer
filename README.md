@@ -49,6 +49,6 @@ I'm documenting the results by showing gifs so that the camera control can be be
 2. phong shader\
 ![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/phong.gif)
 3. toon shader\
-4. ![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/toon.gif)
+![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/toon.gif)
 
 
