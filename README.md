@@ -38,6 +38,17 @@ To run each program from build, you would type
 ```
 mesh-viewer/build $ ../bin/mesh-viewer
 ```
+Unique Feature Implemented: toon shading. 
+The shaders are toon.vs and toon.fs.
 
-# TODO: Screenshots and writeup
+I'm documenting the results by showing gifs so that the camera control can be better displayed.
+
+1. Unlit (default) shader
+![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/unlit.gif)
+
+2. phong shader
+![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/phong.gif)
+3. toon shader
+4. ![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/toon.gif)
+
 
