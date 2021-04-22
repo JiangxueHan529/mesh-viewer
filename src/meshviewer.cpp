@@ -275,6 +275,7 @@ int main(int argc, char** argv)
    glGenBuffers(1, &theVboNormalId);
    glGenBuffers(1, &theElementbuffer);
 
+
    GLuint vaoId;
    glGenVertexArrays(1, &vaoId);
    glBindVertexArray(vaoId);
@@ -290,10 +291,12 @@ int main(int argc, char** argv)
    LoadModels("../models/");
    LoadModel(0);
 
-   GLuint shaderId = LoadShader("../shaders/unlit.vs", "../shaders/unlit.fs");
+   GLuint shaderId = LoadShader("../shaders/phong.vs", "../shaders/phong.fs");
    glUseProgram(shaderId);
 
-   GLuint matrixParam = glGetUniformLocation(shaderId, "mvp");
+   GLuint mvpId = glGetUniformLocation(shaderId, "mvp");
+   GLuint mvId = glGetUniformLocation(shaderId, "uMV");
+   GLuint nmvId = glGetUniformLocation(shaderId, "uNMV");
    
    glm::mat4 projection = glm::perspective(glm::radians(60.0f), 1.0f, 0.1f, 10.0f);
    //glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -2.0f, 2.0f);
@@ -311,6 +314,18 @@ int main(int argc, char** argv)
       camera = glm::lookAt(glm::vec3(x, y, z), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
      // Draw primitive
       glm::mat4 mvp = projection * camera * _transform; 
+      glm::mat4 mv = camera * _transform;
+      glm::mat3 nmv = glm::mat3(glm::vec3(mv[0]), glm::vec3(mv[1]), glm::vec3(mv[2]));
+      
+      glUniformMatrix3fv(nmvId, 1, GL_FALSE, &nmv[0][0]);
+      glUniformMatrix4fv(mvId, 1, GL_FALSE, &mv[0][0]);
+      glUniformMatrix4fv(mvpId, 1, GL_FALSE, &mvp[0][0]);
+      glUniform3f(glGetUniformLocation(shaderId, "uMaterial.Ks"), 1.0, 1.0, 1.0);
+      glUniform3f(glGetUniformLocation(shaderId, "uMaterial.Kd"), 0.4, 0.6, 1.0);
+      glUniform3f(glGetUniformLocation(shaderId, "uMaterial.Ka"), 0.1, 0.1, 0.1);
+      glUniform1f(glGetUniformLocation(shaderId, "uMaterial.shininess"), 80.0);
+      glUniform4f(glGetUniformLocation(shaderId, "uLight.position"), 100.0, 100.0, 100.0, 1.0f);
+      glUniform3f(glGetUniformLocation(shaderId, "uLight.color"), 0.7, 0.7, 1.0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, theElementbuffer);
       glDrawElements(GL_TRIANGLES, theModel.numTriangles() * 3, GL_UNSIGNED_INT, (void*)0);
 

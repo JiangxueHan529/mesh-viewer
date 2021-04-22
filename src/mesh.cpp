@@ -56,7 +56,6 @@ bool Mesh::loadPLY(const std::string& filename)
     file >> read;
     file>> num_vertices;
 
-    // properties
     vector<string> shapes = { "cube", "sphere",  "pyramid" };
     bool more_lines = false;
     for (auto& shape : shapes) {
@@ -71,25 +70,22 @@ bool Mesh::loadPLY(const std::string& filename)
     else {
         num_line = 7;
     }
-    for (int i = 0; i < num_line; ++i) {
+    for (int i = 0; i < num_line; i++) {
         getline(file, read);
     }
     file >> read;
     file >> read;
     file>> num_faces;
 
-    // some other header info
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < 3; i++) {
         getline(file, read);
     }
-
-    // vertices
     float minimum[3];
     float maximum[3];
     position = new float[3 * num_vertices];
     normal = new float[3 * num_vertices];
     indice = new unsigned int[3 * num_faces];
-    for (int i = 0; i < num_vertices; ++i) {
+    for (int i = 0; i < num_vertices; i++) {
         file >> position[i * 3];
         file >> position[i * 3 + 1];
         file >> position[i * 3 + 2];
@@ -133,12 +129,12 @@ bool Mesh::loadPLY(const std::string& filename)
         min_bound = vec3(minimum[0], minimum[1], minimum[2]);
         max_bound = vec3(maximum[0], maximum[1], maximum[2]);
         
-        for (int i = 0; i < num_faces; ++i) {
+        for (int i = 0; i < num_faces; i++) {
             file >> read;
             file >> indice[i * 3];
             file >> indice[i * 3 + 1];
             file >> indice[i * 3 + 2];
-            cout << indice[3 * i + 1] << endl;
+      
         }
 
         file.close();
