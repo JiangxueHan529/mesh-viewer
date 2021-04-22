@@ -43,12 +43,12 @@ The shaders are toon.vs and toon.fs.
 
 I'm documenting the results by showing gifs so that the camera control can be better displayed.
 
-1. Unlit (default) shader
+1. Unlit (default) shader\
 ![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/unlit.gif)
 
-2. phong shader
+2. phong shader\
 ![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/phong.gif)
-3. toon shader
+3. toon shader\
 4. ![alt text](https://github.com/JiangxueHan529/mesh-viewer/blob/main/images/toon.gif)
 
 
