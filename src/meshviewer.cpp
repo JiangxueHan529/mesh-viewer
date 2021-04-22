@@ -9,7 +9,6 @@
 #include <vector>
 #include "mesh.h"
 #include "osutils.h"
-#include <glm/gtx/string_cast.hpp>
 
 using namespace std;
 using namespace glm;
@@ -58,7 +57,6 @@ static void LoadModel(int modelId)
    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(ratio, ratio, ratio));
    //glm::vec4 vector(1.f, 1.f, 1.f, 1.f);
    _transform = scale * move;
-   cout << glm::to_string(_transform) << endl;
    glBindBuffer(GL_ARRAY_BUFFER, theVboPosId);
    glBufferData(GL_ARRAY_BUFFER, theModel.numVertices() * 3 * sizeof(float), theModel.positions(), GL_DYNAMIC_DRAW);
 
@@ -326,6 +324,10 @@ int main(int argc, char** argv)
       glUniform1f(glGetUniformLocation(shaderId, "uMaterial.shininess"), 80.0);
       glUniform4f(glGetUniformLocation(shaderId, "uLight.position"), 100.0, 100.0, 100.0, 1.0f);
       glUniform3f(glGetUniformLocation(shaderId, "uLight.color"), 0.7, 0.7, 1.0);
+      glUniform4f(glGetUniformLocation(shaderId, "Light.position"), 100.0, 100.0, 100.0, 1.0f);
+      glUniform3f(glGetUniformLocation(shaderId, "Light.intensity"), 1, 1, 1);
+      glUniform3f(glGetUniformLocation(shaderId, "Kd"), 0.4, 0.6, 1.0);
+      glUniform3f(glGetUniformLocation(shaderId, "Ka"), 0.1, 0.1, 0.1);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, theElementbuffer);
       glDrawElements(GL_TRIANGLES, theModel.numTriangles() * 3, GL_UNSIGNED_INT, (void*)0);
 
