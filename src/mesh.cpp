@@ -58,7 +58,7 @@ bool Mesh::loadPLY(const std::string& filename)
 
     vector<string> shapes = { "cube", "sphere",  "pyramid" };
     bool more_lines = false;
-    for (auto& shape : shapes) {
+    for (string& shape : shapes) {
         if (filename.find(shape) != string::npos) {
             more_lines = true;
         }
